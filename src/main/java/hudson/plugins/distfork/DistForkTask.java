@@ -1,13 +1,9 @@
 package hudson.plugins.distfork;
 
+import hudson.model.*;
 import hudson.model.Queue.Item;
 import hudson.model.Queue.Task;
 import hudson.model.Queue.Executable;
-import hudson.model.Label;
-import hudson.model.Node;
-import hudson.model.ResourceList;
-import hudson.model.Hudson;
-import hudson.model.AbstractProject;
 import hudson.model.queue.CauseOfBlockage;
 import hudson.model.queue.SubTask;
 import hudson.security.ACL;
@@ -32,12 +28,14 @@ public class DistForkTask implements Task {
     private final Label label;
     private final String displayName;
     private final long estimatedDuration;
+    private final Run<?, ?> parentRun;
     private final Runnable runnable;
 
-    public DistForkTask(Label label, String displayName, long estimatedDuration, Runnable runnable) {
+    public DistForkTask(Label label, String displayName, long estimatedDuration, Run<?,?> parentRun, Runnable runnable) {
         this.label = label;
         this.displayName = displayName;
         this.estimatedDuration = estimatedDuration;
+        this.parentRun = parentRun;
         this.runnable = runnable;
     }
 
@@ -144,5 +142,9 @@ public class DistForkTask implements Task {
     @Override
     public Authentication getDefaultAuthentication(Item item) {
         return ACL.SYSTEM;
+    }
+
+    public Run<?, ?> getParentRun() {
+        return parentRun;
     }
 }

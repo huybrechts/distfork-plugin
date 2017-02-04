@@ -6,11 +6,8 @@ import hudson.FilePath.TarCompression;
 import hudson.Launcher;
 import hudson.Util;
 import hudson.cli.CLICommand;
-import hudson.model.Computer;
-import hudson.model.Hudson;
-import hudson.model.Label;
-import hudson.model.Node;
-import hudson.model.Queue;
+import hudson.cli.CommandDuringBuild;
+import hudson.model.*;
 import hudson.model.Queue.Executable;
 import hudson.remoting.VirtualChannel;
 import hudson.remoting.forward.Forwarder;
@@ -42,7 +39,7 @@ import java.util.concurrent.Future;
  * @author Kohsuke Kawaguchi
  */
 @Extension
-public class DistForkCommand extends CLICommand {
+public class DistForkCommand extends CommandDuringBuild {
 
     @Option(name="-l",usage="Label for controlling where to execute this command")
     public String label;
@@ -116,9 +113,11 @@ public class DistForkCommand extends CLICommand {
             if(dots)    name+=" ...";
         }
 
+        final Run<?,?> runningBuild = optCurrentlyBuilding();
+
         final int[] exitCode = new int[]{-1};
 
-        DistForkTask t = new DistForkTask(l, name, duration, new Runnable() {
+        DistForkTask t = new DistForkTask(l, name, duration, runningBuild, new Runnable() {
             public void run() {
                 StreamTaskListener listener = new StreamTaskListener(stdout, Charset.defaultCharset());
                 try {
